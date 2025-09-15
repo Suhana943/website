@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Assistant Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <style>
+       body {
+  background: url('https://uploads.onecompiler.io/43qbxf9xj/43wsmzs88/Screenshot%202025-09-15%20161853.png') no-repeat center center/cover;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+}
+
+        .girl-portrait-container {
+            position: relative;
+            width: 300px;
+            height: 550px;
+            flex-shrink: 0;
+        }
+
+        .hair {
+            position: absolute;
+            width: 280px;
+            height: 480px;
+            background: linear-gradient(to bottom, #1f1f1f, #2c2c2c);
+            border-radius: 150px 150px 80px 80px;
+            top: -10px;
+            left: 10px;
+            z-index: -2;
+        }
+
+        .face {
+            position: absolute;
+            width: 160px;
+            height: 200px;
+            top: 90px;
+            left: 70px;
+            background: #fddac7;
+            border-radius: 50% 50% 45% 45%;
+            z-index: 1;
+        }
+
+        .neck {
+            position: absolute;
+            width: 70px;
+            height: 90px;
+            top: 270px;
+            left: 115px;
+            background: #fddac7;
+            border-radius: 20px;
+        }
+
+        .shoulders {
+            position: absolute;
+            width: 280px;
+            height: 150px;
+            top: 350px;
+            left: 10px;
+            background: #ff9aa2;
+            border-radius: 80px 80px 0 0;
+            z-index: -1;
+        }
+
+        .eyebrow {
+            position: absolute;
+            width: 50px;
+            height: 8px;
+            background: #2b2b2b;
+            border-radius: 50%;
+            top: 35px;
+        }
+
+        .eyebrow.left {
+            left: 18px;
+            transform: rotate(-8deg);
+        }
+
+        .eyebrow.right {
+            right: 18px;
+            transform: rotate(8deg);
+        }
+
+        .eye {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 50%;
+            top: 65px;
+            overflow: hidden;
+            animation: blink 5s infinite;
+        }
+
+        .eye.left {
+            left: 15px;
+        }
+
+        .eye.right {
+            right: 15px;
+        }
+
+        .iris {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            top: 12px;
+            left: 12px;
+            background: radial-gradient(circle at 50% 50%, #6ec1ff, #0077c9, #002244);
+            border-radius: 50%;
+        }
+
+        .pupil {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            top: 9px;
+            left: 9px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        .nose {
+            position: absolute;
+            width: 18px;
+            height: 14px;
+            top: 115px;
+            left: 71px;
+            background: #fbbfa4;
+            border-radius: 50%;
+        }
+
+        .mouth {
+            position: absolute;
+            width: 70px;
+            height: 35px;
+            top: 155px;
+            left: 45px;
+            border-radius: 25% / 50%;
+            background: #a36d77;
+        }
+
+        .mouth.talking {
+            animation: talk 0.3s infinite alternate;
+        }
+
+        .cheek {
+            position: absolute;
+            width: 35px;
+            height: 25px;
+            background: #ffb6c1;
+            border-radius: 50%;
+            top: 130px;
+            opacity: 0.6;
+        }
+
+        .cheek.left {
+            left: 20px;
+        }
+
+        .cheek.right {
+            right: 20px;
+        }
+
+        @keyframes blink {
+            0%, 92%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        @keyframes talk {
+            from { transform: scaleY(0.4); }
+            to { transform: scaleY(1); }
+        }
+    </style>
+</head>
+
+<body class="flex justify-center items-center p-8">
+    <main class="flex flex-col lg:flex-row gap-10 p-5 w-full max-w-7xl">
+        <aside class="girl-portrait-container hidden lg:block">
+            <div class="hair"></div>
+            <div class="face">
+                <div class="eyebrow left"></div>
+                <div class="eyebrow right"></div>
+                <div class="eye left">
+                    <div class="iris">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="eye right">
+                    <div class="iris">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="nose"></div>
+                <div class="mouth" id="mouth"></div>
+                <div class="cheek left"></div>
+                <div class="cheek right"></div>
+            </div>
+            <div class="neck"></div>
+            <div class="shoulders"></div>
+        </aside>
+
+        <section class="flex flex-col gap-8 flex-grow">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 flex-grow">
+                <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2 md:mb-0">Environmental Data Overview</h2>
+                    <div class="flex flex-wrap items-center gap-4 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <label for="chartType" class="text-gray-700">Chart Type:</label>
+                            <select id="chartType" class="p-2 rounded-md border border-gray-300 bg-gray-50">
+                                <option value="line">Line Chart</option>
+                                <option value="column">Column Chart</option>
+                                <option value="area">Area Chart</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label for="metric" class="text-gray-700">Metric:</label>
+                            <select id="metric" class="p-2 rounded-md border border-gray-300 bg-gray-50">
+                                <option value="Plastic Reduced (kg)">Plastic Reduced (kg)</option>
+                                <option value="Daily Plastic Consumption (kg)">Daily Plastic Consumption (kg)</option>
+                                <option value="Energy Consumption (kWh)">Energy Consumption (kWh)</option>
+                                <option value="CO2 Emission (kg)">CO2 Emission (kg)</option>
+                            </select>
+                        </div>
+                    </div>
+                </header>
+                <div id="data-chart" class="w-full" style="height: 350px;"></div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">AI Voice Assistant</h2>
+                <div id="messages" class="chat-box border border-gray-300 rounded-lg p-4 h-64 overflow-y-auto mb-4 bg-gray-50"></div>
+                <div class="input-group flex items-center gap-2 md:gap-4">
+                    <input type="text" id="userInput" placeholder="Say or type something..."
+                           class="flex-grow p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           aria-label="User input"
+                           onkeypress="if(event.key === 'Enter') sendMessage()">
+                    <button onclick="sendMessage()"
+                            class="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            aria-label="Send message">
+                        Send
+                    </button>
+                    <button onclick="startListening()"
+                            class="p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-xl"
+                            aria-label="Start voice input">
+                        🎤
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const mouth = document.getElementById("mouth");
+        const messagesContainer = document.getElementById("messages");
+        const chartTypeSelector = document.getElementById("chartType");
+        const metricSelector = document.getElementById("metric");
+        const chartContainer = document.getElementById("data-chart");
+
+        // Use a more structured data format
+        const data = [
+            {"Date": "01-Aug-25", "Plastic Reduced (kg)": 12.5, "Cumulative (kg)": 12.5, "Daily Plastic Consumption (kg)": 68.7, "Wood Consumption (kg)": 44.3, "Energy Consumption (kWh)": 316.6, "CO2 Emission (kg)": 450.2},
+            {"Date": "02-Aug-25", "Plastic Reduced (kg)": 15, "Cumulative (kg)": 27.5, "Daily Plastic Consumption (kg)": 97.5, "Wood Consumption (kg)": 26.8, "Energy Consumption (kWh)": 281.4, "CO2 Emission (kg)": 500.8},
+            {"Date": "03-Aug-25", "Plastic Reduced (kg)": 10.2, "Cumulative (kg)": 37.7, "Daily Plastic Consumption (kg)": 86.6, "Wood Consumption (kg)": 22.6, "Energy Consumption (kWh)": 448.6, "CO2 Emission (kg)": 512.6},
+            {"Date": "04-Aug-25", "Plastic Reduced (kg)": 18.4, "Cumulative (kg)": 56.1, "Daily Plastic Consumption (kg)": 79.9, "Wood Consumption (kg)": 58, "Energy Consumption (kWh)": 307, "CO2 Emission (kg)": 480.1},
+            {"Date": "05-Aug-25", "Plastic Reduced (kg)": 11.7, "Cumulative (kg)": 67.8, "Daily Plastic Consumption (kg)": 57.8, "Wood Consumption (kg)": 58.6, "Energy Consumption (kWh)": 284.3, "CO2 Emission (kg)": 420.5},
+            {"Date": "06-Aug-25", "Plastic Reduced (kg)": 14.6, "Cumulative (kg)": 82.4, "Daily Plastic Consumption (kg)": 57.8, "Wood Consumption (kg)": 52.3, "Energy Consumption (kWh)": 362.8, "CO2 Emission (kg)": 465.7},
+            {"Date": "07-Aug-25", "Plastic Reduced (kg)": 16.8, "Cumulative (kg)": 99.2, "Daily Plastic Consumption (kg)": 52.9, "Wood Consumption (kg)": 32.2, "Energy Consumption (kWh)": 242.3, "CO2 Emission (kg)": 390.4},
+            {"Date": "08-Aug-25", "Plastic Reduced (kg)": 19.5, "Cumulative (kg)": 118.7, "Daily Plastic Consumption (kg)": 93.3, "Wood Consumption (kg)": 23.9, "Energy Consumption (kWh)": 440.7, "CO2 Emission (kg)": 550.9},
+            {"Date": "09-Aug-25", "Plastic Reduced (kg)": 13.2, "Cumulative (kg)": 131.9, "Daily Plastic Consumption (kg)": 80.1, "Wood Consumption (kg)": 47.4, "Energy Consumption (kWh)": 222.4, "CO2 Emission (kg)": 430.3},
+            {"Date": "10-Aug-25", "Plastic Reduced (kg)": 17, "Cumulative (kg)": 148.9, "Daily Plastic Consumption (kg)": 85.4, "Wood Consumption (kg)": 37.6, "Energy Consumption (kWh)": 496.1, "CO2 Emission (kg)": 590.2},
+            {"Date": "11-Aug-25", "Plastic Reduced (kg)": 12.8, "Cumulative (kg)": 161.7, "Daily Plastic Consumption (kg)": 51, "Wood Consumption (kg)": 24.9, "Energy Consumption (kWh)": 431.7, "CO2 Emission (kg)": 501.9},
+            {"Date": "12-Aug-25", "Plastic Reduced (kg)": 15.4, "Cumulative (kg)": 177.1, "Daily Plastic Consumption (kg)": 98.5, "Wood Consumption (kg)": 39.8, "Energy Consumption (kWh)": 259.6, "CO2 Emission (kg)": 455.6},
+            {"Date": "13-Aug-25", "Plastic Reduced (kg)": 14.9, "Cumulative (kg)": 192, "Daily Plastic Consumption (kg)": 91.6, "Wood Consumption (kg)": 21.4, "Energy Consumption (kWh)": 201.7, "CO2 Emission (kg)": 410.2},
+            {"Date": "14-Aug-25", "Plastic Reduced (kg)": 18.2, "Cumulative (kg)": 210.2, "Daily Plastic Consumption (kg)": 60.6, "Wood Consumption (kg)": 56.4, "Energy Consumption (kWh)": 444.6, "CO2 Emission (kg)": 530.4},
+            {"Date": "15-Aug-25", "Plastic Reduced (kg)": 20.1, "Cumulative (kg)": 230.3, "Daily Plastic Consumption (kg)": 59.1, "Wood Consumption (kg)": 30.4, "Energy Consumption (kWh)": 412.1, "CO2 Emission (kg)": 510.9},
+            {"Date": "16-Aug-25", "Plastic Reduced (kg)": 13.5, "Cumulative (kg)": 243.8, "Daily Plastic Consumption (kg)": 59.2, "Wood Consumption (kg)": 46.5, "Energy Consumption (kWh)": 418.7, "CO2 Emission (kg)": 490.1},
+            {"Date": "17-Aug-25", "Plastic Reduced (kg)": 16.7, "Cumulative (kg)": 260.5, "Daily Plastic Consumption (kg)": 65.2, "Wood Consumption (kg)": 32.5, "Energy Consumption (kWh)": 431.4, "CO2 Emission (kg)": 505.8},
+            {"Date": "18-Aug-25", "Plastic Reduced (kg)": 15.9, "Cumulative (kg)": 276.4, "Daily Plastic Consumption (kg)": 76.2, "Wood Consumption (kg)": 40.8, "Energy Consumption (kWh)": 222.2, "CO2 Emission (kg)": 440.2},
+            {"Date": "19-Aug-25", "Plastic Reduced (kg)": 17.6, "Cumulative (kg)": 294, "Daily Plastic Consumption (kg)": 71.6, "Wood Consumption (kg)": 41.9, "Energy Consumption (kWh)": 307.5, "CO2 Emission (kg)": 470.6},
+            {"Date": "20-Aug-25", "Plastic Reduced (kg)": 11.9, "Cumulative (kg)": 305.9, "Daily Plastic Consumption (kg)": 64.6, "Wood Consumption (kg)": 27.4, "Energy Consumption (kWh)": 234.8, "CO2 Emission (kg)": 455.9},
+            {"Date": "21-Aug-25", "Plastic Reduced (kg)": 14.3, "Cumulative (kg)": 320.2, "Daily Plastic Consumption (kg)": 80.6, "Wood Consumption (kg)": 58.8, "Energy Consumption (kWh)": 458.9, "CO2 Emission (kg)": 520.3},
+            {"Date": "22-Aug-25", "Plastic Reduced (kg)": 18.9, "Cumulative (kg)": 339.1, "Daily Plastic Consumption (kg)": 57, "Wood Consumption (kg)": 51, "Energy Consumption (kWh)": 387, "CO2 Emission (kg)": 488.4},
+            {"Date": "23-Aug-25", "Plastic Reduced (kg)": 12.6, "Cumulative (kg)": 351.7, "Daily Plastic Consumption (kg)": 64.6, "Wood Consumption (kg)": 57.6, "Energy Consumption (kWh)": 299.3, "CO2 Emission (kg)": 475.2},
+            {"Date": "24-Aug-25", "Plastic Reduced (kg)": 16.2, "Cumulative (kg)": 367.9, "Daily Plastic Consumption (kg)": 68.3, "Wood Consumption (kg)": 55.8, "Energy Consumption (kWh)": 219.1, "CO2 Emission (kg)": 450.8},
+            {"Date": "25-Aug-25", "Plastic Reduced (kg)": 15.7, "Cumulative (kg)": 383.6, "Daily Plastic Consumption (kg)": 72.8, "Wood Consumption (kg)": 43.9, "Energy Consumption (kWh)": 293.3, "CO2 Emission (kg)": 477.5},
+            {"Date": "26-Aug-25", "Plastic Reduced (kg)": 19.3, "Cumulative (kg)": 402.9, "Daily Plastic Consumption (kg)": 89.3, "Wood Consumption (kg)": 56.9, "Energy Consumption (kWh)": 297.6, "CO2 Emission (kg)": 515.1},
+            {"Date": "27-Aug-25", "Plastic Reduced (kg)": 17.1, "Cumulative (kg)": 420, "Daily Plastic Consumption (kg)": 60, "Wood Consumption (kg)": 23.5, "Energy Consumption (kWh)": 418.9, "CO2 Emission (kg)": 499.3},
+            {"Date": "28-Aug-25", "Plastic Reduced (kg)": 14.8, "Cumulative (kg)": 434.8, "Daily Plastic Consumption (kg)": 75.7, "Wood Consumption (kg)": 27.8, "Energy Consumption (kWh)": 391.3, "CO2 Emission (kg)": 480.7},
+            {"Date": "29-Aug-25", "Plastic Reduced (kg)": 16.4, "Cumulative (kg)": 451.2, "Daily Plastic Consumption (kg)": 79.6, "Wood Consumption (kg)": 21.8, "Energy Consumption (kWh)": 466.2, "CO2 Emission (kg)": 530.1},
+            {"Date": "30-Aug-25", "Plastic Reduced (kg)": 18.7, "Cumulative (kg)": 469.9, "Daily Plastic Consumption (kg)": 52.3, "Wood Consumption (kg)": 33, "Energy Consumption (kWh)": 341.7, "CO2 Emission (kg)": 465.9}
+        ];
+
+        const speech = {
+            synth: window.speechSynthesis,
+            speak(text) {
+                if (!("speechSynthesis" in window)) {
+                    console.error("Speech synthesis not supported.");
+                    return;
+                }
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = "en-US";
+                utter.rate = 1;
+                utter.pitch = 1.2;
+                utter.onstart = () => mouth.classList.add("talking");
+                utter.onend = () => mouth.classList.remove("talking");
+                this.synth.cancel();
+                this.synth.speak(utter);
+            }
+        };
+
+        const chart = {
+            instance: null,
+            draw() {
+                const chartType = chartTypeSelector.value;
+                const metric = metricSelector.value;
+                const dates = data.map(d => d.Date.split('-')[0]); // Extract day of month
+                const metricData = data.map(d => d[metric]);
+
+                if (this.instance) {
+                    this.instance.destroy();
+                }
+
+                this.instance = Highcharts.chart(chartContainer, {
+                    chart: {
+                        type: chartType,
+                    },
+                    title: {
+                        text: `${metric} Over Time`,
+                        style: {
+                            fontFamily: 'Segoe UI',
+                            fontWeight: 'bold',
+                            fontSize: '18px'
+                        }
+                    },
+                    xAxis: {
+                        categories: dates,
+                        title: {
+                            text: 'Day of August'
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: metric
+                        }
+                    },
+                    series: [{
+                        name: metric,
+                        data: metricData,
+                        color: chartType === 'column' ? '#007bff' : '#007bff'
+                    }]
+                });
+            }
+        };
+
+        function addMessage(msg, sender) {
+            const div = document.createElement("div");
+            div.textContent = msg;
+            div.className = `p-3 rounded-xl max-w-[85%] chat-bubble ${sender === 'user' ? 'bg-blue-200 self-end' : 'bg-green-100 self-start'}`;
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function respondToUser(input) {
+            const lowerInput = input.toLowerCase();
+            let response = "I'm not sure how to answer that. Please ask about the data, for example, 'total plastic reduced' or 'daily plastic consumption'.";
+
+            if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
+                response = "Hi! How can I help you? I can answer questions about the environmental data you see here.";
+            } else if (lowerInput.includes("total plastic reduced")) {
+                const total = data[data.length - 1]["Cumulative (kg)"];
+                response = `The total plastic reduced to date is ${total} kilograms.`;
+            } else if (lowerInput.includes("average plastic consumption")) {
+                const totalConsumption = data.reduce((sum, item) => sum + item["Daily Plastic Consumption (kg)"], 0);
+                const average = totalConsumption / data.length;
+                response = `The average daily plastic consumption is approximately ${average.toFixed(2)} kilograms.`;
+            } else if (lowerInput.includes("highest energy consumption")) {
+                const maxEnergyDay = data.reduce((max, item) => item["Energy Consumption (kWh)"] > max["Energy Consumption (kWh)"] ? item : max);
+                response = `The day with the highest energy consumption was ${maxEnergyDay.Date}, with ${maxEnergyDay["Energy Consumption (kWh)"]} kilowatt-hours.`;
+            } else if (lowerInput.includes("plastic reduced on")) {
+                const dateMatch = lowerInput.match(/on (\d{1,2}-\w{3}-\d{2})/);
+                if (dateMatch) {
+                    const date = dateMatch[1].trim();
+                    const dayData = data.find(item => item.Date.toLowerCase() === date.toLowerCase());
+                    if (dayData) {
+                        response = `On ${dayData.Date}, the plastic reduced was ${dayData["Plastic Reduced (kg)"]} kilograms.`;
+                    } else {
+                        response = "Sorry, I couldn't find data for that specific date.";
+                    }
+                }
+            }
+
+            addMessage("AI: " + response, "bot");
+            speech.speak(response);
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("userInput");
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage("You: " + text, "user");
+            respondToUser(text);
+            input.value = "";
+        }
+
+        function startListening() {
+            try {
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SR) throw new Error("Speech recognition not supported.");
+
+                const recog = new SR();
+                recog.lang = "en-US";
+                recog.start();
+
+                recog.onresult = (e) => {
+                    const userText = e.results[0][0].transcript;
+                    addMessage("You: " + userText, "user");
+                    respondToUser(userText);
+                };
+            } catch (error) {
+                alert(error.message);
+                console.error(error);
+            }
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            chart.draw();
+            const welcome = "Hi! I'm your AI Assistant. I can help you with your environmental data. Please ask me a question.";
+            addMessage("AI: " + welcome, "bot");
+            speech.speak(welcome);
+
+            chartTypeSelector.addEventListener('change', chart.draw);
+            metricSelector.addEventListener('change', chart.draw);
+        });
+    </script>
+</body>
+</html>
